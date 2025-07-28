@@ -54,20 +54,25 @@ steps:
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: bash
   args:
-    - -c 
-    - | 
-      MODEL_ID=$(gcloud ai models list --region=asia-south1 --filter="display-name=iris-classifier" --format="value(name)")
+    - -c
+    - |
+      echo "Fetching model ID..."
+      MODEL_ID=$(gcloud ai models list --region=asia-south1 --filter="displayName=iris-classifier" --format="value(name)")
+
+      echo "Checking if endpoint exists..."
       ENDPOINT_NAME="iris-endpoint"
-      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="display-name=$ENDPOINT_NAME" --format="value(name)")
+      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="displayName=$ENDPOINT_NAME" --format="value(name)")
 
-      if [ -z "$ENDPOINT_ID"]; then
+      if [ -z "$ENDPOINT_ID" ]; then
+        echo "Creating new endpoint..."
         ENDPOINT_ID=$(gcloud ai endpoints create --region=asia-south1 --display-name=$ENDPOINT_NAME --format="value(name)")
-      fi 
+      fi
 
+      echo "Deploying model to endpoint..."
       gcloud ai endpoints deploy-model $ENDPOINT_ID \
         --model=$MODEL_ID \
         --region=asia-south1 \
-        --display-name=iris-v1 \
+        --display-name="iris-v1" \
         --traffic-split=0=100 \
         --container-port=8080 \
         --enable-access-logging
