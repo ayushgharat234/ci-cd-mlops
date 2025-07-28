@@ -12,9 +12,6 @@ RUN pip install --no-cache-dir scikit-learn joblib flask gunicorn
 # Run training to create model
 RUN python train.py
 
-# Copy the trained model explicitly (optional, for robustness)
-RUN mkdir -p models && cp models/iris_model.joblib ./models/iris_model.joblib
-
 # Confirm model exists
 RUN ls -lh ./models/iris_model.joblib
 
