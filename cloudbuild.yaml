@@ -51,8 +51,7 @@ steps:
         --region=asia-south1 \
         --display-name=iris-classifier \
         --container-image-uri=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest \
-        --artifact-uri=gs://ml-cicd-bucket/models \
-        --force
+        --artifact-uri=gs://ml-cicd-bucket/models 
 
 options:
   substitutionOption: ALLOW_LOOSE
