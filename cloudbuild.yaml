@@ -60,8 +60,8 @@ steps:
       MODEL_ID=$(gcloud ai models list --region=asia-south1 --filter="displayName=iris-classifier" --format="value(name)")
 
       echo "Checking if endpoint exists..."
-      export ENDPOINT_NAME="iris-endpoint"
-      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="displayName=$ENDPOINT_NAME" --format="value(name)")
+      export ENDPOINT_NAME="iris-endpoint" # This line is fine within bash
+      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="displayName=$ENDPOINT_NAME" --format="value(name)") # This line is fine within bash
 
       if [ -z "$ENDPOINT_ID" ]; then
         echo "Creating new endpoint..."
