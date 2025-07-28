@@ -49,34 +49,8 @@ steps:
         --region=asia-south1 \
         --display-name=iris-classifier \
         --container-image-uri=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest
-
-# Deploy the model to Vertex AI Endpoint
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: bash
-  args:
-    - -c
-    - |
-      echo "Fetching model ID..."
-      MODEL_ID=$(gcloud ai models list --region=asia-south1 --filter="displayName=iris-classifier" --format="value(name)")
-
-      echo "Checking if endpoint exists..."
-      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="displayName=${_ENDPOINT_NAME}" --format="value(name)")
-
-      if [[ -z "${ENDPOINT_ID}" ]]; then
-        echo "Creating new endpoint..."
-        ENDPOINT_ID=$(gcloud ai endpoints create --region=asia-south1 --display-name=${_ENDPOINT_NAME} --format="value(name)")
-      fi
-
-      echo "Deploying model to endpoint..."
-      gcloud ai endpoints deploy-model ${ENDPOINT_ID} \
-        --model=${MODEL_ID} \
-        --region=asia-south1 \
-        --display-name="iris-v1" \
-        --traffic-split=0=100 \
-        --container-port=8080 \
-        --enable-access-logging
-
-      echo "Model deployed to endpoint: ${ENDPOINT_ID}"
+      --artifact-uri=gs://ml-cicd-bucket/models \
+      --force
 
 # Define the substitution variable here
 substitutions:
