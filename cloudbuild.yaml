@@ -38,6 +38,40 @@ steps:
       echo "Uploading trained model to GCS..."
       gsutil cp -r /workspace/models gs://ml-cicd-bucket/models
 
+# Upload the Container Image to Vertex AI model
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: bash
+  args: 
+    - -c 
+    - | 
+      echo "Registering model to Vertex AI..."
+      gcloud ai models upload \
+        --region=asia-south1 \
+        --display-name=iris-classifier \
+        --container-image-uri=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest
+
+# Deploy the model to Vertex AI Endpoint
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: bash
+  args:
+    - -c 
+    - | 
+      MODEL_ID=$(gcloud ai models list --region=asia-south1 --filter="display-name=iris-classifier" --format="value(name)")
+      ENDPOINT_NAME="iris-endpoint"
+      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="display-name=$ENDPOINT_NAME" --format="value(name)")
+
+      if [ -z "$ENDPOINT_ID"]; then
+        ENDPOINT_ID=$(gcloud ai endpoints create --region=asia-south1 --display-name=$ENDPOINT_NAME --format="value(name)")
+      fi 
+
+      gcloud ai endpoints deploy-model $ENDPOINT_ID \
+        --model=$MODEL_ID \
+        --region=asia-south1 \
+        --display-name=iris-v1 \
+        --traffic-split=0=100 \
+        --container-port=8080 \
+        --enable-access-logging
+
 images:
   - 'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
 
