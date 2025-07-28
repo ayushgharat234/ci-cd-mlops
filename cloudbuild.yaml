@@ -1,0 +1,42 @@
+steps:
+
+# Build Docker Image
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    [
+      'build',
+      '-t',
+      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest',
+      '.'
+    ]
+
+# Push Docker Image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: 
+    [
+      'push',
+      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
+    ]
+
+# Run Docker Container to Train Model and Save Output
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    [
+      'run',
+      '--rm',
+      '-v',
+      '/workspace/models/:/app/models',
+      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
+    ]
+
+# Copy Trained Model to GCS Bucket 
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: bash
+  args:
+    - -c 
+    - |
+      echo "Uploading trained model to GCS..."
+      gsutil cp -r /workspace/models gs://ml-cicd-bucket/models
+
+images:
+  - 'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
