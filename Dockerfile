@@ -2,18 +2,22 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Copy training and serving scripts
+# Copy scripts
 COPY model/train.py ./train.py
 COPY endpoints/serve.py ./serve.py
 
-# Install required Python packages
+# Install dependencies
 RUN pip install --no-cache-dir scikit-learn joblib flask gunicorn
 
-# Run training during build
+# Run training to create model
 RUN python train.py
 
-# Expose port for serving (used later during inference)
+# Copy the trained model explicitly (optional, for robustness)
+RUN mkdir -p models && cp models/iris_model.joblib ./models/iris_model.joblib
+
+# Confirm model exists
+RUN ls -lh ./models/iris_model.joblib
+
 EXPOSE 8080
 
-# Default command: Serve model via Flask app with Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "serve:app"]
