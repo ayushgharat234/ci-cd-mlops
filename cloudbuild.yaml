@@ -1,6 +1,6 @@
 steps:
 
-# Build Docker Image
+# Step 1: Build Docker Image
 - name: 'gcr.io/cloud-builders/docker'
   args:
     [
@@ -10,7 +10,7 @@ steps:
       '.'
     ]
 
-# Push Docker Image to Artifact Registry
+# Step 2: Push Docker Image to Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   args:
     [
@@ -18,18 +18,18 @@ steps:
       'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
     ]
 
-# Run Docker Container to Train Model and Save Output
+# Step 3: Run Docker Container to Train and Save Model Artifacts
 - name: 'gcr.io/cloud-builders/docker'
   args:
     [
       'run',
       '--rm',
       '-v',
-      '/workspace/models/:/app/models',
+      '/workspace/models:/app/models',
       'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
     ]
 
-# Copy Trained Model to GCS Bucket
+# Step 4: Copy Trained Model to GCS Bucket
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: bash
   args:
@@ -38,7 +38,7 @@ steps:
       echo "Uploading trained model to GCS..."
       gsutil cp -r /workspace/models gs://ml-cicd-bucket/models
 
-# Upload the Container Image to Vertex AI model
+# Step 5: Register Model with Vertex AI
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: bash
   args:
@@ -48,13 +48,9 @@ steps:
       gcloud ai models upload \
         --region=asia-south1 \
         --display-name=iris-classifier \
-        --container-image-uri=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest
-      --artifact-uri=gs://ml-cicd-bucket/models \
-      --force
-
-# Define the substitution variable here
-substitutions:
-  _ENDPOINT_NAME: "iris-endpoint"
+        --container-image-uri=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest \
+        --artifact-uri=gs://ml-cicd-bucket/models \
+        --force
 
 options:
   substitutionOption: ALLOW_LOOSE
