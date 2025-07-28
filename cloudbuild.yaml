@@ -40,3 +40,5 @@ steps:
 
 images:
   - 'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
+
+logsBucket: 'gs://ml-cicd-bucket/logs'
