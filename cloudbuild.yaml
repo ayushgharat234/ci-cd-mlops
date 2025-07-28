@@ -12,7 +12,7 @@ steps:
 
 # Push Docker Image to Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: 
+  args:
     [
       'push',
       'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
@@ -29,11 +29,11 @@ steps:
       'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
     ]
 
-# Copy Trained Model to GCS Bucket 
+# Copy Trained Model to GCS Bucket
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: bash
   args:
-    - -c 
+    - -c
     - |
       echo "Uploading trained model to GCS..."
       gsutil cp -r /workspace/models gs://ml-cicd-bucket/models
@@ -41,9 +41,9 @@ steps:
 # Upload the Container Image to Vertex AI model
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: bash
-  args: 
-    - -c 
-    - | 
+  args:
+    - -c
+    - |
       echo "Registering model to Vertex AI..."
       gcloud ai models upload \
         --region=asia-south1 \
@@ -60,27 +60,32 @@ steps:
       MODEL_ID=$(gcloud ai models list --region=asia-south1 --filter="displayName=iris-classifier" --format="value(name)")
 
       echo "Checking if endpoint exists..."
-      export ENDPOINT_NAME="iris-endpoint" # This line is fine within bash
-      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="displayName=$ENDPOINT_NAME" --format="value(name)") # This line is fine within bash
+      # Use the Cloud Build substitution here
+      ENDPOINT_NAME_VAR="${_ENDPOINT_NAME}" # Assign substitution value to a bash variable
+      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="displayName=${ENDPOINT_NAME_VAR}" --format="value(name)")
 
-      if [ -z "$ENDPOINT_ID" ]; then
+      if [ -z "${ENDPOINT_ID}" ]; then
         echo "Creating new endpoint..."
-        ENDPOINT_ID=$(gcloud ai endpoints create --region=asia-south1 --display-name=$ENDPOINT_NAME --format="value(name)")
+        ENDPOINT_ID=$(gcloud ai endpoints create --region=asia-south1 --display-name="${ENDPOINT_NAME_VAR}" --format="value(name)")
       fi
 
       echo "Deploying model to endpoint..."
-      gcloud ai endpoints deploy-model "$ENDPOINT_ID" \
-        --model="$MODEL_ID" \
+      gcloud ai endpoints deploy-model "${ENDPOINT_ID}" \
+        --model="${MODEL_ID}" \
         --region=asia-south1 \
         --display-name="iris-v1" \
         --traffic-split=0=100 \
         --container-port=8080 \
         --enable-access-logging
 
-      echo "Model deployed to endpoint: $ENDPOINT_ID"
+      echo "Model deployed to endpoint: ${ENDPOINT_ID}"
 
 options:
   substitutionOption: ALLOW_LOOSE
+
+# Define the substitution variable here
+substitutions:
+  _ENDPOINT_NAME: "iris-endpoint"
 
 images:
   - 'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
