@@ -60,13 +60,17 @@ steps:
       MODEL_ID=$(gcloud ai models list --region=asia-south1 --filter="displayName=iris-classifier" --format="value(name)")
 
       echo "Checking if endpoint exists..."
-      # Use the Cloud Build substitution here
-      ENDPOINT_NAME_VAR="${_ENDPOINT_NAME}" # Assign substitution value to a bash variable
-      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="displayName=${ENDPOINT_NAME_VAR}" --format="value(name)")
+      # Assign Cloud Build substitution to a bash variable
+      ENDPOINT_NAME_VAR="${_ENDPOINT_NAME}" # This line is correct as is
+
+      # Escape the $ when using the bash variable in gcloud commands within the multiline string
+      # This tells Cloud Build to pass "$ENDPOINT_NAME_VAR" literally to bash
+      # where bash will then expand it.
+      ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="displayName=$${ENDPOINT_NAME_VAR}" --format="value(name)")
 
       if [ -z "${ENDPOINT_ID}" ]; then
         echo "Creating new endpoint..."
-        ENDPOINT_ID=$(gcloud ai endpoints create --region=asia-south1 --display-name="${ENDPOINT_NAME_VAR}" --format="value(name)")
+        ENDPOINT_ID=$(gcloud ai endpoints create --region=asia-south1 --display-name=$${ENDPOINT_NAME_VAR} --format="value(name)")
       fi
 
       echo "Deploying model to endpoint..."
