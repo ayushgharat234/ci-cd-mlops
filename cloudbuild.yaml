@@ -26,7 +26,9 @@ steps:
       '--rm',
       '-v',
       '/workspace/models:/app/models',
-      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
+      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest',
+      'python',
+      'train.py'
     ]
 
 # Step 4: Copy Trained Model to GCS Bucket
