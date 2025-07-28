@@ -63,21 +63,21 @@ steps:
       ENDPOINT_NAME="${_ENDPOINT_NAME}"
       ENDPOINT_ID=$(gcloud ai endpoints list --region=asia-south1 --filter="displayName=${_ENDPOINT_NAME}" --format="value(name)")
 
-      if [ -z "${ENDPOINT_ID}" ]; then
+      if [ -z "$ENDPOINT_ID" ]; then
         echo "Creating new endpoint..."
         ENDPOINT_ID=$(gcloud ai endpoints create --region=asia-south1 --display-name=${_ENDPOINT_NAME} --format="value(name)")
       fi
 
       echo "Deploying model to endpoint..."
-      gcloud ai endpoints deploy-model "${ENDPOINT_ID}" \
-        --model="${MODEL_ID}" \
+      gcloud ai endpoints deploy-model "$ENDPOINT_ID" \
+        --model="$MODEL_ID" \
         --region=asia-south1 \
         --display-name="iris-v1" \
         --traffic-split=0=100 \
         --container-port=8080 \
         --enable-access-logging
 
-      echo "Model deployed to endpoint: ${ENDPOINT_ID}"
+      echo "Model deployed to endpoint: $ENDPOINT_ID"
 
 # Define the substitution variable here
 substitutions:
