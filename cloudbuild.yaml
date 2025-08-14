@@ -1,6 +1,6 @@
 steps:
 
-# Step 1: Build Docker Image
+# Build Docker Image
 - name: 'gcr.io/cloud-builders/docker'
   args:
     [
@@ -10,7 +10,7 @@ steps:
       '.'
     ]
 
-# Step 2: Push Docker Image to Artifact Registry
+# Push Docker Image to Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   args:
     [
@@ -18,7 +18,7 @@ steps:
       'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
     ]
 
-# Step 3: Run Docker Container to Train and Save Model Artifacts
+# Run Docker Container to Train and Save Model Artifacts
 - name: 'gcr.io/cloud-builders/docker'
   args:
     [
@@ -31,7 +31,7 @@ steps:
       'train.py'
     ]
 
-# Step 4: Copy Trained Model to GCS Bucket
+# Copy Trained Model to GCS Bucket
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: bash
   args:
@@ -40,7 +40,7 @@ steps:
       echo "Uploading trained model to GCS..."
       gsutil cp -r /workspace/models gs://ml-cicd-bucket/models
 
-# Step 5: Register Model with Vertex AI
+# Register Model with Vertex AI
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: bash
   args:
@@ -52,6 +52,19 @@ steps:
         --display-name=iris-classifier \
         --container-image-uri=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest \
         --artifact-uri=gs://ml-cicd-bucket/models 
+
+# Create a Cloud Deploy release to trigger the deployment pipeline
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+    - deploy
+    - releases
+    - create
+    - 'iris-release-$SHORT_SHA'
+    - '--delivery-pipeline=iris-model-pipeline'
+    - '--region=asia-south1' 
+    - '--source=.'
+    - '--images=iris-model-image=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
 
 options:
   substitutionOption: ALLOW_LOOSE

@@ -1,0 +1,31 @@
+apiVersion: deploy.cloud.google.com/v1
+kind: DeliveryPipeline
+metadata:
+  name: iris-model-pipeline
+  description: Deployment pipeline for the Iris model.
+serialPipeline:
+  stages:
+    - targetId: staging-environment
+      profiles: []
+    - targetId: production-environment
+      profiles: []
+
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: staging-environment
+description: Staging Cloud Run environment for the Iris model.
+requireApproval: false 
+run:
+  location: projects/ci-cd-467305/locations/asia-south1
+
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: production-environment
+description: Production Cloud Run environment for the Iris model.
+requireApproval: true 
+run:
+  location: projects/ci-cd-467305/locations/asia-south1
