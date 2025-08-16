@@ -3,4 +3,5 @@ kind: Config
 deploy:
   kubectl:
     manifests:
-      - cloudrun-service.yaml
+      rawYaml:
+        - cloudrun-service.yaml

@@ -6,7 +6,7 @@ steps:
     [
       'build',
       '-t',
-      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest',
+      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:$SHORT_SHA',
       '.'
     ]
 
@@ -15,7 +15,7 @@ steps:
   args:
     [
       'push',
-      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
+      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:$SHORT_SHA'
     ]
 
 # Run Docker Container to Train and Save Model Artifacts
@@ -26,7 +26,7 @@ steps:
       '--rm',
       '-v',
       '/workspace/models:/app/models',
-      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest',
+      'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:$SHORT_SHA',
       'python',
       'train.py'
     ]
@@ -50,7 +50,7 @@ steps:
       gcloud ai models upload \
         --region=us-central1 \
         --display-name=iris-classifier \
-        --container-image-uri=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest \
+        --container-image-uri=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:$SHORT_SHA \
         --artifact-uri=gs://ml-cicd-bucket/models 
 
 # Create a Cloud Deploy release to trigger the deployment pipeline
@@ -64,12 +64,12 @@ steps:
     - '--delivery-pipeline=iris-model-pipeline'
     - '--region=asia-south1' 
     - '--source=.'
-    - '--images=iris-model-image=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
+    - '--images=iris-model-image=asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:$SHORT_SHA'
 
 options:
   substitutionOption: ALLOW_LOOSE
 
 images:
-  - 'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:latest'
+  - 'asia-south1-docker.pkg.dev/ci-cd-467305/ml-models/iris-model:$SHORT_SHA'
 
 logsBucket: 'gs://ml-cicd-bucket/logs'
