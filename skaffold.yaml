@@ -1,4 +1,7 @@
 apiVersion: skaffold/v4beta1
 kind: Config
+manifests:
+  rawYaml:
+  - cloudrun-service.yaml
 deploy:
   cloudrun: {}
