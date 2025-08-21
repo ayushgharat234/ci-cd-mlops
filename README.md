@@ -12,6 +12,13 @@ This project moves beyond notebooks and manual scripts. It's a real-world implem
 
 ---
 
+## Architecture Diagram
+
+![Architecture Diagram](architecture/architecture.png)
+
+
+---
+
 ## Table of Contents
 
 * [Project Overview](#-project-overview)

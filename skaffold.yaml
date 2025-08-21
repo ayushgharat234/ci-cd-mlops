@@ -1,3 +1,4 @@
+# Skaffold configuration for deploying the Iris model to Cloud Run
 apiVersion: skaffold/v4beta1
 kind: Config
 manifests:

@@ -1,3 +1,4 @@
+# Importing necessary libraries
 import joblib
 from flask import Flask, request, jsonify
 import numpy as np
@@ -6,6 +7,7 @@ app =  Flask(__name__)
 
 model = joblib.load("models/iris_model.joblib")
 
+# Endpoint for prediction
 @app.route('/predict', methods=['POST'])
 def predict():
     try:

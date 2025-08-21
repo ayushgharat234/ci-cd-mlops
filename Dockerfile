@@ -5,10 +5,15 @@ WORKDIR /app
 # Copy scripts
 COPY model/train.py ./train.py
 COPY endpoints/serve.py ./serve.py
-COPY requirements.txt ./
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir scikit-learn joblib flask gunicorn
+
+# Run training to create model
+RUN python train.py
+
+# Confirm model exists
+RUN ls -lh ./models/iris_model.joblib
 
 EXPOSE 8080
 
